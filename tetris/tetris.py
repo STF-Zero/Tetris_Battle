@@ -27,6 +27,7 @@ class Tetris:
         self.game_over = False
         self.current_piece = self.new_piece()
         self.grid = [[0] * GRID_WIDTH for _ in range(GRID_HEIGHT)]
+        # self.peak_height = 0
         
         # 设置游戏难度，游戏难度为1easy，2normal，3hard
         self.hard_level = 1
@@ -36,7 +37,9 @@ class Tetris:
         self.drop_speed = 30 // (self.hard_level * self.speed)
         # 计时器
         self.frame_count = 0
-        
+         
+    def set_drop_speed(self, speed):
+        self.drop_speed = speed
         
     def new_piece(self):
         # 每种形状的俄罗斯方块都对应其固定的颜色
@@ -45,11 +48,12 @@ class Tetris:
         
         # 计算方块宽度，确保不会超出边界
         piece_width = len(shape[0])
+        piece_height = len(shape)
         max_x = GRID_WIDTH - piece_width
         
         # 生成随机 x 位置
         random_x = random.randint(0, max_x)
-        return Piece(shape, color, random_x)
+        return Piece(shape, color, random_x, -piece_height)
     
     def move_piece(self, dx, dy):
         if not self.check_collision(self.current_piece, dx, dy):
@@ -60,14 +64,37 @@ class Tetris:
             self.current_piece = self.new_piece()   # 固定一个方块，自动创建新方块
             if self.check_collision(self.current_piece, 0, 0):
                 self.game_over = True
-            # else:
-            #     self.lock_piece()
-            #     self.current_piece = self.new_piece()
         
     def rotate_piece(self):
         rotated_piece = self.current_piece.get_rotated()
-        if not self.check_collision(self.current_piece, 0, 0):
+        origin_x = self.current_piece.x
+        origin_y = self.current_piece.y
+        
+        # 计算旋转后的方块宽度和高度，确保不会超出边界
+        rotated_width = len(rotated_piece[0])
+        rotated_height = len(rotated_piece)
+        
+        # 预调整，防止旋转后超出边界
+        new_x = max(0, min(self.current_piece.x, GRID_WIDTH - rotated_width))
+        new_y = max(0, min(self.current_piece.y, GRID_HEIGHT - rotated_height))
+        
+        # 先尝试直接旋转
+        if not self.check_collision_with_shape(rotated_piece, new_x, new_y):
             self.current_piece.shape = rotated_piece
+            self.current_piece.x, self.current_piece.y = new_x, new_y
+            return
+
+        # 墙踢逻辑：尝试微调位置（左右移动）
+        for dx in [-1, 1, -2, 2]:  # 先小调整，再大调整
+            if not self.check_collision_with_shape(rotated_piece, new_x + dx, new_y):
+                self.current_piece.shape = rotated_piece
+                self.current_piece.x = new_x + dx
+                self.current_piece.y = new_y
+                return
+
+        # 如果所有尝试都失败，恢复原始状态
+        self.current_piece.x = origin_x
+        self.current_piece.y = origin_y
         
     def check_collision(self, piece, dx, dy):
         for y, row in enumerate(piece.shape):
@@ -76,6 +103,22 @@ class Tetris:
                     new_x = piece.x + x + dx
                     new_y = piece.y + y + dy
                     if new_x < 0 or new_x >= GRID_WIDTH or new_y >= GRID_HEIGHT or self.grid[new_y][new_x]:
+                        return True
+                    # elif 
+        return False
+    
+    def check_collision_with_shape(self, shape, x, y):
+        for row_idx, row in enumerate(shape):
+            for col_idx, cell in enumerate(row):
+                if cell:  # 仅检测非空方块
+                    new_x = x + col_idx
+                    new_y = y + row_idx
+
+                    # 检查是否超出边界
+                    if new_x < 0 or new_x >= GRID_WIDTH or new_y >= GRID_HEIGHT:
+                        return True
+                    # 检查是否与已有方块重叠
+                    if self.grid[new_y][new_x]:
                         return True
         return False
     
@@ -94,10 +137,13 @@ class Tetris:
     
     def update(self):
         self.frame_count += 1
-        
+        # if self.game_over:
+        #     print("Game Over")
         if self.frame_count >= self.drop_speed and not self.game_over:
+            
             self.move_piece(0, 1)
             self.frame_count = 0
+            self.clear_lines()
         # if not self.game_over:
         #     self.move_piece(0, 1)
             
@@ -109,11 +155,12 @@ class Tetris:
         self.current_piece.draw(screen)
     
 class Piece:
-    def __init__(self, shape, color, x):
+    def __init__(self, shape, color, x, y):
         self.shape = shape
         self.color = color
         self.x = x
         self.y = 0
+        print("x=%d, y=%d" % (self.x, self.y))
         
     def get_rotated(self):
         return [list(row) for row in zip(*reversed(self.shape))]

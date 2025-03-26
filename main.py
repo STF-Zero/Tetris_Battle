@@ -1,12 +1,15 @@
 import pygame
 from settings import *
 from game_mode import *
+import utils.keyboard as keyboard
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("屠龙")
 clock = pygame.time.Clock()
 game_mode = GameMode()
+# origin_speed = game_mode.tetris.drop_speed
+# target_speed = origin_speed * 1.5
 
 running = True
 while running:
@@ -15,16 +18,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-            elif event.key == pygame.K_LEFT:
-                game_mode.tetris.move_piece(-1, 0)
-            elif event.key == pygame.K_RIGHT:
-                game_mode.tetris.move_piece(1, 0)
-            elif event.key == pygame.K_SPACE:
-                game_mode.tetris.rotate_piece()
-            
+        keyboard.handle_input(event, game_mode)
     pygame.display.flip()
     screen.fill((0, 0, 0))
     
