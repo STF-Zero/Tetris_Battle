@@ -2,6 +2,7 @@ import pygame
 from settings import *
 from game_mode import *
 import utils.keyboard as keyboard
+from ui.hud import HUD
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -13,18 +14,29 @@ game_mode = GameMode()
 
 running = True
 while running:
-    clock.tick(FPS)
+    
+    hud = HUD()
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         keyboard.handle_input(event, game_mode)
-    pygame.display.flip()
+        
+        if hud.pause_button.is_clicked(event):
+            game_mode.pause()
+        if hud.shop_button.is_clicked(event):
+            game_mode.shop()
+     
     screen.fill((0, 0, 0))
     
-    # print(clock)
-    game_mode.update()
-    game_mode.draw(screen)
+    game_mode.update(hud)
+    game_mode.draw(screen, hud)
+    
+    # hud.update_money(10)
+    # hud.draw(screen)
+    
+    pygame.display.flip()
+    clock.tick(FPS)
     
 pygame.quit()
 quit()

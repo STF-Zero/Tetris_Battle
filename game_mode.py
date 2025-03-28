@@ -8,16 +8,31 @@ class GameMode:
         self.game_mode = True
         self.tetris = Tetris()
         
-    def update(self):
+    def pause(self):
         if self.game_mode:
-            self.tetris.update()
+            self.tetris.pause()
+        else:
+            # TODO: 暂停战斗系统
+            pass
+        
+    def shop(self):
+        if self.game_mode:
+            self.tetris.shop()
+        else:
+            # TODO: 打开战斗系统商店
+            pass
+        
+    def update(self, hud):
+        if self.game_mode:
+            self.tetris.update(hud)
         else:
             # TODO: 更新战斗系统
             pass
         
-    def draw(self, screen):
+    def draw(self, screen, hud):
         if self.game_mode:
             self.tetris.draw(screen)
         else:
             # TODO: 绘制战斗系统
             pass
+        hud.draw(screen)

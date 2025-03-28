@@ -1,6 +1,7 @@
 import pygame
 import random
 from settings import *
+from tetris.piece import Piece
 
 SHAPES = [
     [[1, 1, 1, 1]],  # I
@@ -29,6 +30,8 @@ class Tetris:
         self.grid = [[0] * GRID_WIDTH for _ in range(GRID_HEIGHT)]
         # self.peak_height = 0
         
+        self.money = 0
+        
         # 设置游戏难度，游戏难度为1easy，2normal，3hard
         self.hard_level = 1
         # 玩家手动设置的下落速度倍数，同时也是消除方块得分的倍数
@@ -37,6 +40,14 @@ class Tetris:
         self.drop_speed = 30 // (self.hard_level * self.speed)
         # 计时器
         self.frame_count = 0
+        
+    def pause(self):
+        self.game_over = True
+        print("游戏暂停")
+        
+    def shop(self):
+        self.pause()
+        print("游戏商店")
          
     def set_drop_speed(self, speed):
         self.drop_speed = speed
@@ -134,18 +145,16 @@ class Tetris:
         for _ in range(lines_cleared):
             new_grid.insert(0, [0] * GRID_WIDTH)
         self.grid = new_grid
+        
+        self.money += lines_cleared * self.speed * 10
     
-    def update(self):
+    def update(self, hud):
         self.frame_count += 1
-        # if self.game_over:
-        #     print("Game Over")
         if self.frame_count >= self.drop_speed and not self.game_over:
-            
             self.move_piece(0, 1)
             self.frame_count = 0
             self.clear_lines()
-        # if not self.game_over:
-        #     self.move_piece(0, 1)
+        hud.update_money(self.money)
             
     def draw(self, screen):
         for y, row in enumerate(self.grid):
@@ -154,19 +163,3 @@ class Tetris:
                     pygame.draw.rect(screen, cell, (x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
         self.current_piece.draw(screen)
     
-class Piece:
-    def __init__(self, shape, color, x, y):
-        self.shape = shape
-        self.color = color
-        self.x = x
-        self.y = 0
-        print("x=%d, y=%d" % (self.x, self.y))
-        
-    def get_rotated(self):
-        return [list(row) for row in zip(*reversed(self.shape))]
-    
-    def draw(self, screen):
-        for y, row in enumerate(self.shape):
-            for x, cell in enumerate(row):
-                if cell:
-                    pygame.draw.rect(screen, self.color, (self.x * BLOCK_SIZE + x * BLOCK_SIZE, self.y * BLOCK_SIZE + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
