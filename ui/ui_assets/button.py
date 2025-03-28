@@ -1,7 +1,7 @@
 import pygame
 
 pygame.font.init()
-FONT = pygame.font.Font(None, 36)
+FONT = pygame.font.SysFont("SimHei", 20)
 
 class Button:
     def __init__(self, x, y, width, height, text, color, text_color):

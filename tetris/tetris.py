@@ -42,12 +42,17 @@ class Tetris:
         self.frame_count = 0
         
     def pause(self):
-        self.game_over = True
-        print("游戏暂停")
+        if not self.game_over:
+            self.game_over = True
+            print("游戏暂停")
+        else:
+            self.game_over = False
+            print("游戏继续")
+        
         
     def shop(self):
-        self.pause()
-        print("游戏商店")
+        # self.pause()
+        print("进入游戏商店")
          
     def set_drop_speed(self, speed):
         self.drop_speed = speed
@@ -155,6 +160,7 @@ class Tetris:
             self.frame_count = 0
             self.clear_lines()
         hud.update_money(self.money)
+        # return False
             
     def draw(self, screen):
         for y, row in enumerate(self.grid):

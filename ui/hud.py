@@ -10,12 +10,13 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 pygame.font.init()
-FONT = pygame.font.Font(None, 36)
+FONT = pygame.font.SysFont("SimHei", 20)
 
 class HUD:
     def __init__(self):
-        self.pause_button = btn.Button(WIDTH*0.35, 2, 80, 40, 'pause', BLACK, WHITE)
-        self.shop_button = btn.Button(WIDTH*0.5, 2, 80, 40, 'shop', BLACK, WHITE)
+        self.pause_button = btn.Button(WIDTH*0.35, 2, 50, 20, '暂停', BLACK, WHITE)
+        self.shop_button = btn.Button(WIDTH*0.5, 2, 50, 20, '商店', BLACK, WHITE)
+        self.battle_button = btn.Button(WIDTH*0.65, 2, 50, 20, '战斗', BLACK, WHITE)
         self.money = 0
         
     def update_money(self, new_money):
@@ -25,7 +26,7 @@ class HUD:
         # 绘制按钮
         self.pause_button.draw(screen)
         self.shop_button.draw(screen)
-
+        self.battle_button.draw(screen)
         # 绘制金钱
         money_text = "Money: {}".format(self.money)
         money_surface = FONT.render(money_text, True, WHITE)

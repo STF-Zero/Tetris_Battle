@@ -7,7 +7,7 @@ class Piece:
         self.color = color
         self.x = x
         self.y = 0
-        print("x=%d, y=%d" % (self.x, self.y))
+        # print("x=%d, y=%d" % (self.x, self.y))
         
     def get_rotated(self):
         return [list(row) for row in zip(*reversed(self.shape))]
