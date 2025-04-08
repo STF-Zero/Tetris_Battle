@@ -20,8 +20,10 @@ class Warrior:
         self.last_attack_time = pygame.time.get_ticks()
         self.is_attacking = False
         self.attack_range = self.initial_attack_range
-        self.attack_speed = 5  # 扩散速度
+        self.attack_speed = 4  # 扩散速度
         self.hit_enemies = set() # 记录当前攻击波次已经打过的敌人
+        self.warrior_icon = pygame.image.load("assets/warrior.png")
+        self.warrior_icon = pygame.transform.scale(self.warrior_icon, (self.radius * 2, self.radius * 2))
         
     def move(self, dx, dy):
         new_x = dx * self.speed + self.x
@@ -67,7 +69,7 @@ class Warrior:
             for enemy in enemies:
                 if self.is_in_attack_range(enemy):
                     if enemy.reduce_hp(self.damage):
-                        beat_num += 1
+                        beat_num += enemy.level
                         enemies.remove(enemy)
             self.attack_range = self.initial_attack_range
         return beat_num, beated
@@ -81,19 +83,24 @@ class Warrior:
     
     def is_in_attack_range(self, target):
         # 计算目标与自己的距离
-        distance = ((self.x - target.x)**2 + (self.y - target.y)**2) ** 0.5 - target.radius - self.attack_range
-        print("distance is ", distance)
-        print("attack range is ", self.attack_range)
+        distance = ((self.x - target.x)**2 + (self.y - target.y)**2) ** 0.5 - self.attack_range / 2
+        # 测试中发现攻击范围与所绘制攻击范围的半径似乎并不同步，经测试发现这样的距离计算方式更为准确
+
         if distance <= self.attack_range:
-            print("attack range is ", self.attack_range)
-            print("target in range")
             return True
         return False
     
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+        # pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+        screen.blit(self.warrior_icon, (int(self.x - self.radius), int(self.y - self.radius)))
+        
+        # 绘制血条
+        pygame.draw.rect(screen, (255, 0, 0), (self.x - self.radius, self.y - self.radius - 10, self.radius * 2, 5))  # 血条背景
+        pygame.draw.rect(screen, (0, 255, 0), (self.x - self.radius, self.y - self.radius - 10, self.radius * 2 * (self.health / 100), 5))  # 血条
+        # 绘制血量文字
         text_surface = FONT.render(f"{self.health}", True, WHITE)  # 白色字体
-        text_rect = text_surface.get_rect(center=(self.x, self.y - self.radius - 5))  # 居中显示
+        text_rect = text_surface.get_rect(center=(self.x, self.y - self.radius*2))  # 居中显示
         screen.blit(text_surface, text_rect)  # 绘制文本
         
         pygame.draw.circle(screen, (255, 255, 0), (self.x, self.y), self.attack_range, 2)  # 绘制攻击范围
+        # print("attack circle radius is ", self.attack_range)
